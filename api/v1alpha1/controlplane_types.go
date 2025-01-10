@@ -22,10 +22,18 @@ import (
 
 // ControlPlaneSpec defines the desired state of ControlPlane
 type ControlPlaneSpec struct {
-	Type               ControlPlaneType  `json:"type,omitempty"`
-	Backend            BackendDBType     `json:"backend,omitempty"`
-	PostCreateHook     *string           `json:"postCreateHook,omitempty"`
-	PostCreateHookVars map[string]string `json:"postCreateHookVars,omitempty"`
+	Type    ControlPlaneType `json:"type,omitempty"`
+	Backend BackendDBType    `json:"backend,omitempty"`
+	// bootstrapSecretRef contains a reference to the kubeconfig used to bootstrap adoption of
+	// an external cluster
+	// +optional
+	BootstrapSecretRef *SecretReference `json:"bootstrapSecretRef,omitempty"`
+	// tokenExpirationSeconds is the expiration time for generated auth token
+	// +optional
+	// +kubebuilder:default:=31536000
+	TokenExpirationSeconds *int64            `json:"tokenExpirationSeconds,omitempty"`
+	PostCreateHook         *string           `json:"postCreateHook,omitempty"`
+	PostCreateHookVars     map[string]string `json:"postCreateHookVars,omitempty"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane
@@ -71,7 +79,7 @@ const (
 	BackendDBTypeDedicated BackendDBType = "dedicated"
 )
 
-// +kubebuilder:validation:Enum=k8s;ocm;vcluster;host
+// +kubebuilder:validation:Enum=k8s;ocm;vcluster;host;external
 type ControlPlaneType string
 
 const (
@@ -79,6 +87,7 @@ const (
 	ControlPlaneTypeOCM      ControlPlaneType = "ocm"
 	ControlPlaneTypeVCluster ControlPlaneType = "vcluster"
 	ControlPlaneTypeHost     ControlPlaneType = "host"
+	ControlPlaneTypeExternal ControlPlaneType = "external"
 )
 
 // We do not use ObjectReference as its use is discouraged in favor of a locally defined type.
@@ -90,7 +99,7 @@ type SecretReference struct {
 	// `name` is the name of the secret.
 	// Required
 	Name string `json:"name"`
-	// Required
+	// +optional
 	Key string `json:"key"`
 	// Required
 	InClusterKey string `json:"inClusterKey"`

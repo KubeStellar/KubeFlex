@@ -60,18 +60,49 @@ spec:
                 - shared
                 - dedicated
                 type: string
+              bootstrapSecretRef:
+                description: |-
+                  BootstrapSecretRef contains a reference to the kubeconfig used to bootstrap adoption of
+                  an external cluster
+                properties:
+                  inClusterKey:
+                    description: Required
+                    type: string
+                  key:
+                    type: string
+                  name:
+                    description: |-
+                      `name` is the name of the secret.
+                      Required
+                    type: string
+                  namespace:
+                    description: |-
+                      `namespace` is the namespace of the secret.
+                      Required
+                    type: string
+                required:
+                - inClusterKey
+                - name
+                - namespace
+                type: object
               postCreateHook:
                 type: string
               postCreateHookVars:
                 additionalProperties:
                   type: string
                 type: object
+              tokenExpirationSeconds:
+                default: 31536000
+                description: expiration time for generated auth token
+                format: int64
+                type: integer
               type:
                 enum:
                 - k8s
                 - ocm
                 - vcluster
                 - host
+                - external
                 type: string
             type: object
           status:
@@ -120,7 +151,6 @@ spec:
                     description: Required
                     type: string
                   key:
-                    description: Required
                     type: string
                   name:
                     description: |-
@@ -134,7 +164,6 @@ spec:
                     type: string
                 required:
                 - inClusterKey
-                - key
                 - name
                 - namespace
                 type: object
